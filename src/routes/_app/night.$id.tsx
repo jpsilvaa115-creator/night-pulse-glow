@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles } from "lucide-react";
+import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon } from "lucide-react";
 import {
   getNight, saveNight, intensity, recommendedWaterMl, estimateBAC,
-  computeBadges, pureAlcoholG,
+  computeBadges, pureAlcoholG, recommendedRestH,
 } from "@/lib/destrava-store";
 
 export const Route = createFileRoute("/_app/night/$id")({
