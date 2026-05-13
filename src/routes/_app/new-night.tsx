@@ -12,7 +12,7 @@ function NewNight() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [city, setCity] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
+  // bairro removido
   const [venue, setVenue] = useState("");
   const [vibe, setVibe] = useState<"chill"|"social"|"lendaria"|"after">("social");
   const [drinks, setDrinks] = useState<Drink[]>([]);
