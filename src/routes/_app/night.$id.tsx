@@ -132,6 +132,22 @@ function NightSummary() {
         </button>
       </section>
 
+      {/* Rest / recovery */}
+      <section className="glass rounded-3xl p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Moon className="h-5 w-5 text-primary" />
+          <h3 className="font-display font-bold">Tempo de descanso recomendado</h3>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <Mini label="Descanso ideal" value={`${restH}h`} />
+          <Mini label="Metabolizar álcool" value={`${metabolizeH}h`} />
+          <Mini label="Acordar a partir de" value={new Date(Date.now() + restH * 3600000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} />
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Sono reparador acelera a recuperação. Evite cafeína nas próximas horas e priorize um ambiente escuro e silencioso.
+        </p>
+      </section>
+
       {/* Responsible alerts */}
       {ints.pct > 60 && (
         <section className="rounded-3xl p-5 border border-warning/40 bg-warning/10 flex gap-3 animate-fade-up">
