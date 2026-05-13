@@ -107,12 +107,21 @@ function NewNight() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-          {DRINK_PRESETS.map((p) => (
-            <button key={p.label} onClick={()=>addDrink(p)}
-              className="px-3 py-3 rounded-xl bg-secondary hover:bg-primary/20 hover:border-primary border border-transparent text-sm font-medium transition-all flex items-center justify-center gap-1.5">
-              <Plus className="h-3.5 w-3.5" /> {p.label}
-            </button>
-          ))}
+          {DRINK_PRESETS.map((p) => {
+            const count = drinks.filter((d) => d.type === p.label).length;
+            return (
+              <button key={p.label} onClick={()=>addDrink(p)}
+                className="px-3 py-3 rounded-xl bg-secondary hover:bg-primary/20 hover:border-primary border border-transparent text-sm font-medium transition-all flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5">
+                  {p.label === "Cerveja" && <Beer className="h-3.5 w-3.5" />}
+                  {p.label}
+                </span>
+                <span className={`min-w-[22px] h-[22px] grid place-items-center rounded-full text-xs font-mono ${count > 0 ? "bg-gradient-neon text-white" : "bg-background/60 text-muted-foreground"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="space-y-2">
