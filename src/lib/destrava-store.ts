@@ -95,11 +95,18 @@ export function pureAlcoholG(d: Drink) {
   return d.amountMl * d.abv * 0.789;
 }
 
-// Estimated BAC (Widmark, simplified) — assumes avg 70kg / r=0.68
+// Estimated BAC in g/L (‰) — Widmark, assumes avg 70kg / r=0.68, β=0.15‰/h
 export function estimateBAC(drinks: Drink[], hours = 3) {
   const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
-  const bac = totalG / (70 * 0.68 * 10) - 0.015 * hours;
-  return Math.max(0, Math.round(bac * 1000) / 1000);
+  const bac = totalG / (70 * 0.68) - 0.15 * hours;
+  return Math.max(0, Math.round(bac * 100) / 100);
+}
+
+// Recommended rest hours to fully metabolize alcohol (~8g/h) + minimum sleep
+export function recommendedRestH(drinks: Drink[]) {
+  const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
+  const metabolizeH = totalG / 8;
+  return Math.max(7, Math.ceil(metabolizeH + 6));
 }
 
 export function intensity(drinks: Drink[]): { pct: number; label: string; color: string } {
