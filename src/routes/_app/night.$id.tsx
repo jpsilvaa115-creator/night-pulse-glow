@@ -43,6 +43,7 @@ function NightSummary() {
   const end = new Date(night.endedAt ?? Date.now()).getTime();
   const hours = Math.max(1, Math.round((end - start) / 3600000));
   const metabolizeH = Math.ceil(totalAlcoholG / 8);
+  const restH = recommendedRestH(night.drinks);
 
   // build timeline
   const events = [
