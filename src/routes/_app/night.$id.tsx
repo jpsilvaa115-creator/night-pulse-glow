@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles } from "lucide-react";
+import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon } from "lucide-react";
 import {
   getNight, saveNight, intensity, recommendedWaterMl, estimateBAC,
-  computeBadges, pureAlcoholG,
+  computeBadges, pureAlcoholG, recommendedRestH,
 } from "@/lib/destrava-store";
 
 export const Route = createFileRoute("/_app/night/$id")({
@@ -43,6 +43,7 @@ function NightSummary() {
   const end = new Date(night.endedAt ?? Date.now()).getTime();
   const hours = Math.max(1, Math.round((end - start) / 3600000));
   const metabolizeH = Math.ceil(totalAlcoholG / 8);
+  const restH = recommendedRestH(night.drinks);
 
   // build timeline
   const events = [
@@ -64,8 +65,24 @@ function NightSummary() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-display font-bold leading-tight">{night.title}</h1>
           <p className="text-sm text-white/80 mt-2 flex items-center justify-center gap-1">
-            <MapPin className="h-3.5 w-3.5" /> {night.neighborhood} · {night.city}
+            <MapPin className="h-3.5 w-3.5" /> {night.city}
           </p>
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            <div className="glass rounded-2xl py-3 px-3 flex items-center gap-2 justify-center">
+              <LogIn className="h-4 w-4 text-cyan" />
+              <div className="text-left">
+                <div className="text-[10px] uppercase tracking-wider text-white/70">Chegada</div>
+                <div className="text-sm font-mono font-bold">{new Date(night.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+              </div>
+            </div>
+            <div className="glass rounded-2xl py-3 px-3 flex items-center gap-2 justify-center">
+              <LogOut className="h-4 w-4 text-neon" />
+              <div className="text-left">
+                <div className="text-[10px] uppercase tracking-wider text-white/70">Saída</div>
+                <div className="text-sm font-mono font-bold">{night.endedAt ? new Date(night.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</div>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-3 mt-7">
             <Hero label="Duração" value={`${hours}h`} />
             <Hero label="Drinks" value={night.drinks.length} />
@@ -113,6 +130,22 @@ function NightSummary() {
         <button onClick={drink250} className="w-full px-4 py-3 rounded-xl bg-cyan/20 border border-cyan/40 text-cyan font-semibold hover:bg-cyan/30 transition-colors">
           + 250ml — Já bebi água
         </button>
+      </section>
+
+      {/* Rest / recovery */}
+      <section className="glass rounded-3xl p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Moon className="h-5 w-5 text-primary" />
+          <h3 className="font-display font-bold">Tempo de descanso recomendado</h3>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <Mini label="Descanso ideal" value={`${restH}h`} />
+          <Mini label="Metabolizar álcool" value={`${metabolizeH}h`} />
+          <Mini label="Acordar a partir de" value={new Date(Date.now() + restH * 3600000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} />
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Sono reparador acelera a recuperação. Evite cafeína nas próximas horas e priorize um ambiente escuro e silencioso.
+        </p>
       </section>
 
       {/* Responsible alerts */}
