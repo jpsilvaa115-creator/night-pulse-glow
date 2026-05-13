@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Trash2, MapPin, Camera } from "lucide-react";
+import { Trash2, MapPin, Camera, Beer } from "lucide-react";
 import { DRINK_PRESETS, saveNight, getUser, type Drink } from "@/lib/destrava-store";
 
 export const Route = createFileRoute("/_app/new-night")({
