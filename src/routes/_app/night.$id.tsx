@@ -64,8 +64,24 @@ function NightSummary() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-display font-bold leading-tight">{night.title}</h1>
           <p className="text-sm text-white/80 mt-2 flex items-center justify-center gap-1">
-            <MapPin className="h-3.5 w-3.5" /> {night.neighborhood} · {night.city}
+            <MapPin className="h-3.5 w-3.5" /> {night.city}
           </p>
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            <div className="glass rounded-2xl py-3 px-3 flex items-center gap-2 justify-center">
+              <LogIn className="h-4 w-4 text-cyan" />
+              <div className="text-left">
+                <div className="text-[10px] uppercase tracking-wider text-white/70">Chegada</div>
+                <div className="text-sm font-mono font-bold">{new Date(night.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+              </div>
+            </div>
+            <div className="glass rounded-2xl py-3 px-3 flex items-center gap-2 justify-center">
+              <LogOut className="h-4 w-4 text-neon" />
+              <div className="text-left">
+                <div className="text-[10px] uppercase tracking-wider text-white/70">Saída</div>
+                <div className="text-sm font-mono font-bold">{night.endedAt ? new Date(night.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</div>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-3 mt-7">
             <Hero label="Duração" value={`${hours}h`} />
             <Hero label="Drinks" value={night.drinks.length} />
