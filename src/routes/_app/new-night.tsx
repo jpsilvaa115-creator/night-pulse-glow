@@ -43,7 +43,7 @@ function NewNight() {
       userId: user.id,
       title: title || "Minha noite",
       city: city || "Cidade",
-      neighborhood: neighborhood || "—",
+      neighborhood: "",
       venues: venue ? [{ name: venue, time: new Date().toISOString() }] : [],
       drinks,
       hydrationMl: 0,
