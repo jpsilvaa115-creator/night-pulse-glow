@@ -120,9 +120,9 @@ export function intensity(drinks: Drink[]): { pct: number; label: string; color:
 }
 
 export function recommendedWaterMl(drinks: Drink[]) {
-  const alc = drinks.reduce((a, d) => a + d.amountMl * d.abv, 0);
-  // ~2x alcohol volume in water, min 500
-  return Math.max(500, Math.round(alc * 2 / 50) * 50);
+  const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
+  // ~250ml de água por dose padrão (10g de álcool puro), mínimo 500ml
+  return Math.max(500, Math.round((totalG / 10) * 250 / 50) * 50);
 }
 
 function seedNights(): Night[] {
