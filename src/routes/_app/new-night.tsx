@@ -69,12 +69,8 @@ function NewNight() {
           <input value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="Sexta na Vila"
             className="w-full bg-input rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary" />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Cidade"><input value={city} onChange={(e)=>setCity(e.target.value)} placeholder="São Paulo"
-            className="w-full bg-input rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary" /></Field>
-          <Field label="Bairro"><input value={neighborhood} onChange={(e)=>setNeighborhood(e.target.value)} placeholder="Vila Madalena"
-            className="w-full bg-input rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary" /></Field>
-        </div>
+        <Field label="Cidade"><input value={city} onChange={(e)=>setCity(e.target.value)} placeholder="São Paulo"
+          className="w-full bg-input rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary" /></Field>
         <Field label="Local / bar / balada">
           <div className="relative">
             <MapPin className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
