@@ -11,11 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRankingsRouteImport } from './routes/_app/rankings'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppNewNightRouteImport } from './routes/_app/new-night'
 import { Route as AppMapRouteImport } from './routes/_app/map'
+import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppUIdRouteImport } from './routes/_app/u.$id'
 import { Route as AppNightIdRouteImport } from './routes/_app/night.$id'
 
 const AppRoute = AppRouteImport.update({
@@ -26,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppRankingsRoute = AppRankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
@@ -42,6 +50,11 @@ const AppMapRoute = AppMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFriendsRoute = AppFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFeedRoute = AppFeedRouteImport.update({
   id: '/feed',
   path: '/feed',
@@ -50,6 +63,11 @@ const AppFeedRoute = AppFeedRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUIdRoute = AppUIdRouteImport.update({
+  id: '/u/$id',
+  path: '/u/$id',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNightIdRoute = AppNightIdRouteImport.update({
@@ -62,19 +80,25 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/feed': typeof AppFeedRoute
+  '/friends': typeof AppFriendsRoute
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
   '/profile': typeof AppProfileRoute
+  '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
+  '/u/$id': typeof AppUIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/feed': typeof AppFeedRoute
+  '/friends': typeof AppFriendsRoute
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
   '/profile': typeof AppProfileRoute
+  '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
+  '/u/$id': typeof AppUIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -82,10 +106,13 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feed': typeof AppFeedRoute
+  '/_app/friends': typeof AppFriendsRoute
   '/_app/map': typeof AppMapRoute
   '/_app/new-night': typeof AppNewNightRoute
   '/_app/profile': typeof AppProfileRoute
+  '/_app/rankings': typeof AppRankingsRoute
   '/_app/night/$id': typeof AppNightIdRoute
+  '/_app/u/$id': typeof AppUIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -93,29 +120,38 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/feed'
+    | '/friends'
     | '/map'
     | '/new-night'
     | '/profile'
+    | '/rankings'
     | '/night/$id'
+    | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
     | '/feed'
+    | '/friends'
     | '/map'
     | '/new-night'
     | '/profile'
+    | '/rankings'
     | '/night/$id'
+    | '/u/$id'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/dashboard'
     | '/_app/feed'
+    | '/_app/friends'
     | '/_app/map'
     | '/_app/new-night'
     | '/_app/profile'
+    | '/_app/rankings'
     | '/_app/night/$id'
+    | '/_app/u/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -139,6 +175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/rankings': {
+      id: '/_app/rankings'
+      path: '/rankings'
+      fullPath: '/rankings'
+      preLoaderRoute: typeof AppRankingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/profile': {
       id: '/_app/profile'
       path: '/profile'
@@ -160,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMapRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/friends': {
+      id: '/_app/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AppFriendsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/feed': {
       id: '/_app/feed'
       path: '/feed'
@@ -172,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/u/$id': {
+      id: '/_app/u/$id'
+      path: '/u/$id'
+      fullPath: '/u/$id'
+      preLoaderRoute: typeof AppUIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/night/$id': {
@@ -187,19 +244,25 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeedRoute: typeof AppFeedRoute
+  AppFriendsRoute: typeof AppFriendsRoute
   AppMapRoute: typeof AppMapRoute
   AppNewNightRoute: typeof AppNewNightRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppRankingsRoute: typeof AppRankingsRoute
   AppNightIdRoute: typeof AppNightIdRoute
+  AppUIdRoute: typeof AppUIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppFeedRoute: AppFeedRoute,
+  AppFriendsRoute: AppFriendsRoute,
   AppMapRoute: AppMapRoute,
   AppNewNightRoute: AppNewNightRoute,
   AppProfileRoute: AppProfileRoute,
+  AppRankingsRoute: AppRankingsRoute,
   AppNightIdRoute: AppNightIdRoute,
+  AppUIdRoute: AppUIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
