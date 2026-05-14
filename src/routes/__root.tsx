@@ -73,7 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Destrava — tracker da sua noite" },
-      { name: "description", content: "O oposto do Strava: registre noites, festas e rolês com estatísticas, hidratação e resumo visual. 18+." },
+      { name: "description", content: "Destrava — sua noite, seu replay. Registre rolês, festas e bares com estatísticas, hidratação e resumo visual. 18+." },
       { name: "author", content: "Destrava" },
       { property: "og:title", content: "Destrava — tracker social da vida noturna" },
       { property: "og:description", content: "Premium, social e divertido. Apenas para maiores de 18 anos." },
