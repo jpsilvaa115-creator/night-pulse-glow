@@ -18,6 +18,7 @@ import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppUIdRouteImport } from './routes/_app/u.$id'
 import { Route as AppNightIdRouteImport } from './routes/_app/night.$id'
 
 const AppRoute = AppRouteImport.update({
@@ -64,6 +65,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppUIdRoute = AppUIdRouteImport.update({
+  id: '/u/$id',
+  path: '/u/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNightIdRoute = AppNightIdRouteImport.update({
   id: '/night/$id',
   path: '/night/$id',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AppProfileRoute
   '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
+  '/u/$id': typeof AppUIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AppProfileRoute
   '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
+  '/u/$id': typeof AppUIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_app/profile': typeof AppProfileRoute
   '/_app/rankings': typeof AppRankingsRoute
   '/_app/night/$id': typeof AppNightIdRoute
+  '/_app/u/$id': typeof AppUIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rankings'
     | '/night/$id'
+    | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rankings'
     | '/night/$id'
+    | '/u/$id'
   id:
     | '__root__'
     | '/'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/rankings'
     | '/_app/night/$id'
+    | '/_app/u/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -212,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/u/$id': {
+      id: '/_app/u/$id'
+      path: '/u/$id'
+      fullPath: '/u/$id'
+      preLoaderRoute: typeof AppUIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/night/$id': {
       id: '/_app/night/$id'
       path: '/night/$id'
@@ -231,6 +250,7 @@ interface AppRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppRankingsRoute: typeof AppRankingsRoute
   AppNightIdRoute: typeof AppNightIdRoute
+  AppUIdRoute: typeof AppUIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -242,6 +262,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppRankingsRoute: AppRankingsRoute,
   AppNightIdRoute: AppNightIdRoute,
+  AppUIdRoute: AppUIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
