@@ -15,6 +15,7 @@ import { Route as AppRankingsRouteImport } from './routes/_app/rankings'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppNewNightRouteImport } from './routes/_app/new-night'
 import { Route as AppMapRouteImport } from './routes/_app/map'
+import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppNightIdRouteImport } from './routes/_app/night.$id'
@@ -48,6 +49,11 @@ const AppMapRoute = AppMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFriendsRoute = AppFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFeedRoute = AppFeedRouteImport.update({
   id: '/feed',
   path: '/feed',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/feed': typeof AppFeedRoute
+  '/friends': typeof AppFriendsRoute
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
   '/profile': typeof AppProfileRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/feed': typeof AppFeedRoute
+  '/friends': typeof AppFriendsRoute
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
   '/profile': typeof AppProfileRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feed': typeof AppFeedRoute
+  '/_app/friends': typeof AppFriendsRoute
   '/_app/map': typeof AppMapRoute
   '/_app/new-night': typeof AppNewNightRoute
   '/_app/profile': typeof AppProfileRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/feed'
+    | '/friends'
     | '/map'
     | '/new-night'
     | '/profile'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/feed'
+    | '/friends'
     | '/map'
     | '/new-night'
     | '/profile'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/dashboard'
     | '/_app/feed'
+    | '/_app/friends'
     | '/_app/map'
     | '/_app/new-night'
     | '/_app/profile'
@@ -179,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMapRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/friends': {
+      id: '/_app/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AppFriendsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/feed': {
       id: '/_app/feed'
       path: '/feed'
@@ -206,6 +225,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeedRoute: typeof AppFeedRoute
+  AppFriendsRoute: typeof AppFriendsRoute
   AppMapRoute: typeof AppMapRoute
   AppNewNightRoute: typeof AppNewNightRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -216,6 +236,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppFeedRoute: AppFeedRoute,
+  AppFriendsRoute: AppFriendsRoute,
   AppMapRoute: AppMapRoute,
   AppNewNightRoute: AppNewNightRoute,
   AppProfileRoute: AppProfileRoute,
