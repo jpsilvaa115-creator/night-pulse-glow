@@ -35,9 +35,19 @@ export type User = {
   birthYear: number;
 };
 
+export type PublicUser = {
+  id: string;
+  username: string;
+  bio: string;
+  city?: string;
+};
+
 const KEY_USER = "destrava.user";
 const KEY_NIGHTS = "destrava.nights";
 const KEY_AGE_OK = "destrava.age_ok";
+const KEY_FRIENDS = "destrava.friends";
+const KEY_REQUESTS_OUT = "destrava.requests.out";
+const KEY_REQUESTS_IN = "destrava.requests.in";
 
 export function getAgeOk(): boolean {
   if (typeof window === "undefined") return false;
