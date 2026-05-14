@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Destrava — o tracker da sua noite" },
-      { name: "description", content: "O oposto do Strava: registre noites, festas e rolês com estatísticas, hidratação e resumo visual." },
+      { name: "description", content: "Destrava — sua noite, seu replay. Registre rolês, mapeie festas, monitore hidratação e tenha um resumo visual da noite." },
       { property: "og:title", content: "Destrava — tracker social da vida noturna" },
       { property: "og:description", content: "Premium, social e divertido. Apenas para maiores de 18 anos." },
     ],
