@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRankingsRouteImport } from './routes/_app/rankings'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppNewNightRouteImport } from './routes/_app/new-night'
 import { Route as AppMapRouteImport } from './routes/_app/map'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppRankingsRoute = AppRankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
   '/profile': typeof AppProfileRoute
+  '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
 }
 export interface FileRoutesByTo {
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
   '/profile': typeof AppProfileRoute
+  '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
 }
 export interface FileRoutesById {
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/_app/map': typeof AppMapRoute
   '/_app/new-night': typeof AppNewNightRoute
   '/_app/profile': typeof AppProfileRoute
+  '/_app/rankings': typeof AppRankingsRoute
   '/_app/night/$id': typeof AppNightIdRoute
 }
 export interface FileRouteTypes {
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/new-night'
     | '/profile'
+    | '/rankings'
     | '/night/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/new-night'
     | '/profile'
+    | '/rankings'
     | '/night/$id'
   id:
     | '__root__'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/_app/map'
     | '/_app/new-night'
     | '/_app/profile'
+    | '/_app/rankings'
     | '/_app/night/$id'
   fileRoutesById: FileRoutesById
 }
@@ -138,6 +150,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/rankings': {
+      id: '/_app/rankings'
+      path: '/rankings'
+      fullPath: '/rankings'
+      preLoaderRoute: typeof AppRankingsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/profile': {
       id: '/_app/profile'
@@ -190,6 +209,7 @@ interface AppRouteChildren {
   AppMapRoute: typeof AppMapRoute
   AppNewNightRoute: typeof AppNewNightRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppRankingsRoute: typeof AppRankingsRoute
   AppNightIdRoute: typeof AppNightIdRoute
 }
 
@@ -199,6 +219,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMapRoute: AppMapRoute,
   AppNewNightRoute: AppNewNightRoute,
   AppProfileRoute: AppProfileRoute,
+  AppRankingsRoute: AppRankingsRoute,
   AppNightIdRoute: AppNightIdRoute,
 }
 
@@ -211,3 +232,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
