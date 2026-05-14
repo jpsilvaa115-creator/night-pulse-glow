@@ -65,8 +65,8 @@ function Landing() {
               <Sparkles className="h-4 w-4" /> Beta · Apenas 18+
             </div>
             <h1 className="text-5xl sm:text-6xl font-display font-bold leading-[1.05]">
-              O oposto do<br />
-              <span className="text-gradient-neon">Strava.</span>
+              <span className="text-gradient-neon">Destrava.</span><br />
+              Sua noite, seu replay.
             </h1>
             <p className="text-lg text-muted-foreground mt-6 max-w-md">
               Destrava é o tracker social da sua noite. Registre rolês, mapeie festas, monitore hidratação e tenha um resumo visual estilo <em>Wrapped</em> para compartilhar.
