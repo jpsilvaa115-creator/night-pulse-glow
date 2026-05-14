@@ -1,12 +1,14 @@
 import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles } from "lucide-react";
+import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles, Trophy, Users } from "lucide-react";
 import { getUser, logout, type User as DUser } from "@/lib/destrava-store";
 
 const NAV = [
   { to: "/feed", label: "Feed", icon: Home },
   { to: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { to: "/new-night", label: "Nova noite", icon: Plus, accent: true },
+  { to: "/rankings", label: "Rankings", icon: Trophy },
+  { to: "/friends", label: "Amigos", icon: Users },
   { to: "/map", label: "Mapa", icon: MapPin },
   { to: "/profile", label: "Perfil", icon: User },
 ];
