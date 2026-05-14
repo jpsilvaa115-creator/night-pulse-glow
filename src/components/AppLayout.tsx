@@ -13,10 +13,11 @@ const NAV = [
 
 export function AppLayout() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<DUser | null>(null);
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const user = typeof window !== "undefined" ? getUser() : null;
 
+  useEffect(() => { setUser(getUser()); }, []);
   useEffect(() => { setOpen(false); }, [path]);
 
   return (
