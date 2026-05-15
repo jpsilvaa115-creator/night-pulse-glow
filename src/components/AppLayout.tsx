@@ -16,18 +16,30 @@ const NAV = [
   { to: "/profile", label: "Perfil", icon: User },
 ];
 
-export function AppLayout() {
+export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<DUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
-  useEffect(() => { setUser(getUser()); }, []);
   useEffect(() => { setOpen(false); }, [path]);
+
+  useEffect(() => {
+    if (!user) { setProfile(null); return; }
+    let cancelled = false;
+    supabase.from("profiles").select("username, bio").eq("id", user.id).maybeSingle()
+      .then(({ data }) => { if (!cancelled && data) setProfile(data); });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/" });
+  };
 
   return (
     <div className="min-h-screen flex w-full">
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 glass border-r border-border transform transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-full"
@@ -67,17 +79,17 @@ export function AppLayout() {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-          {user ? (
+          {profile ? (
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-gradient-neon grid place-items-center text-sm font-bold">
-                {user.username.slice(0, 1).toUpperCase()}
+                {profile.username.slice(0, 1).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold truncate">@{user.username}</div>
-                <div className="text-xs text-muted-foreground truncate">{user.bio || "sem bio"}</div>
+                <div className="text-sm font-semibold truncate">@{profile.username}</div>
+                <div className="text-xs text-muted-foreground truncate">{profile.bio || "sem bio"}</div>
               </div>
               <button
-                onClick={() => { logout(); navigate({ to: "/" }); }}
+                onClick={handleLogout}
                 className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
                 aria-label="Sair"
               >
@@ -95,7 +107,6 @@ export function AppLayout() {
         />
       )}
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-30 glass border-b border-border">
           <div className="flex items-center justify-between px-4 sm:px-6 py-3">
@@ -120,9 +131,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1">
-          <Outlet />
-        </main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
