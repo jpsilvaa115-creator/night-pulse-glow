@@ -1,7 +1,10 @@
-import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, type ReactNode } from "react";
 import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles, Trophy, Users } from "lucide-react";
-import { getUser, logout, type User as DUser } from "@/lib/destrava-store";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+
+type Profile = { username: string; bio: string };
 
 const NAV = [
   { to: "/feed", label: "Feed", icon: Home },
