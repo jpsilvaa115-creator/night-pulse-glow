@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Heart, MessageCircle, MapPin, Share2, Flame } from "lucide-react";
-import { getNights, intensity, computeBadges, type Night } from "@/lib/destrava-store";
+import { useEffect, useState } from "react";
+import { Heart, MessageCircle, MapPin, Share2, Flame, Sparkles } from "lucide-react";
+import { intensity, computeBadges, type Night } from "@/lib/destrava-store";
+import { fetchAllNights, likeNight } from "@/lib/nights-api";
 
 export const Route = createFileRoute("/_app/feed")({
   head: () => ({ meta: [{ title: "Feed — Destrava" }] }),
@@ -9,10 +10,22 @@ export const Route = createFileRoute("/_app/feed")({
 });
 
 function Feed() {
-  const [nights, setNights] = useState<Night[]>(() => getNights());
+  const [nights, setNights] = useState<Night[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const like = (id: string) => {
+  useEffect(() => {
+    let cancelled = false;
+    fetchAllNights().then((data) => {
+      if (cancelled) return;
+      setNights(data);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const like = async (id: string) => {
     setNights((prev) => prev.map((n) => n.id === id ? { ...n, likes: n.likes + 1 } : n));
+    await likeNight(id).catch(() => {});
   };
 
   return (
@@ -21,6 +34,25 @@ function Feed() {
         <h1 className="text-3xl font-display font-bold">Feed</h1>
         <span className="text-xs text-muted-foreground">{nights.length} noites</span>
       </div>
+
+      {loading && (
+        <div className="space-y-5">
+          {[0, 1].map((i) => (
+            <div key={i} className="glass rounded-3xl h-96 animate-pulse" />
+          ))}
+        </div>
+      )}
+
+      {!loading && nights.length === 0 && (
+        <div className="glass rounded-3xl p-10 text-center">
+          <Sparkles className="h-8 w-8 mx-auto text-primary mb-3" />
+          <p className="font-semibold">Nenhuma noite por aqui ainda</p>
+          <p className="text-sm text-muted-foreground mt-1">Seja o primeiro a registrar um rolê.</p>
+          <Link to="/new-night" className="mt-4 inline-block px-5 py-2.5 rounded-xl bg-gradient-neon font-semibold glow-neon">
+            Registrar primeira noite
+          </Link>
+        </div>
+      )}
 
       {nights.map((n, i) => {
         const ints = intensity(n.drinks);
@@ -33,12 +65,12 @@ function Feed() {
           >
             <div className="p-5 flex items-center gap-3">
               <div className="h-11 w-11 rounded-full bg-gradient-neon grid place-items-center text-sm font-bold">
-                {n.userId.slice(2, 3).toUpperCase()}
+                {n.userId.slice(0, 1).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm">@{n.userId.replace("u_", "")}</div>
+                <div className="font-semibold text-sm">@{n.userId.slice(0, 6)}</div>
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" /> {n.neighborhood} · {n.city}
+                  <MapPin className="h-3 w-3" /> {n.city || "—"}
                 </div>
               </div>
               <span className="text-[11px] uppercase tracking-wider px-2 py-1 rounded-full" style={{ background: `${ints.color}20`, color: ints.color }}>
