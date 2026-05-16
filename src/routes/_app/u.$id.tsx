@@ -8,12 +8,13 @@ import {
   declineFriendRequest,
   findUser,
   friendshipStatus,
-  getNights,
-  getUser,
   removeFriend,
   sendFriendRequest,
+  type Night,
   type PublicUser,
 } from "@/lib/destrava-store";
+import { fetchNightsByUser } from "@/lib/nights-api";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app/u/$id")({
   head: () => ({ meta: [{ title: "Perfil — Destrava" }] }),
@@ -23,13 +24,15 @@ export const Route = createFileRoute("/_app/u/$id")({
 function PublicProfile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const meId = user?.id ?? null;
   const [u, setU] = useState<PublicUser | null>(null);
   const [tick, setTick] = useState(0);
-  const [meId, setMeId] = useState<string | null>(null);
+  const [nights, setNights] = useState<Night[]>([]);
 
   useEffect(() => {
     setU(findUser(id) ?? null);
-    setMeId(getUser()?.id ?? null);
+    fetchNightsByUser(id).then(setNights);
   }, [id, tick]);
 
   if (!u) {
@@ -41,13 +44,13 @@ function PublicProfile() {
     );
   }
 
-  const status = friendshipStatus(u.id);
+  const status = friendshipStatus(u.id, meId);
   const isMe = status === "self";
-  const nights = getNights().filter((n) => n.userId === u.id);
   const badges = Array.from(new Set(nights.flatMap(computeBadges)));
   const venues = new Set(nights.flatMap((n) => n.venues.map((v) => v.name))).size;
 
   const refresh = () => setTick((t) => t + 1);
+
 
   return (
     <div className="container mx-auto max-w-2xl px-4 sm:px-6 py-6 space-y-5">

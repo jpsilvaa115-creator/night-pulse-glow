@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
-import { getNights } from "@/lib/destrava-store";
+import { fetchAllNights } from "@/lib/nights-api";
+import type { Night } from "@/lib/destrava-store";
 
 const NightMap = lazy(() =>
   import("@/components/NightMap").then((m) => ({ default: m.NightMap })),
@@ -13,10 +14,14 @@ export const Route = createFileRoute("/_app/map")({
 });
 
 function MapPage() {
+  const [nights, setNights] = useState<Night[]>([]);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
-  const nights = mounted ? getNights() : [];
+  useEffect(() => {
+    setMounted(true);
+    fetchAllNights().then(setNights);
+  }, []);
+
   const venues = nights.flatMap((n) =>
     n.venues.map((v) => ({ name: v.name, city: n.city, time: v.time, nightId: n.id })),
   );

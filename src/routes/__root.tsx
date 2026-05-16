@@ -73,18 +73,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Destrava — reviva sua noite" },
-      { name: "description", content: "Seu app de rolês: registre noites, acompanhe hidratação e recuperação, compartilhe momentos e reviva experiências com amigos.
-Reviva Seus Rolês!" },
+      { name: "description", content: "Seu app de rolês: registre noites, acompanhe hidratação e recuperação, compartilhe momentos e reviva experiências com amigos. Reviva Seus Rolês!" },
       { name: "author", content: "Destrava" },
       { property: "og:title", content: "Destrava — reviva sua noite" },
-      { property: "og:description", content: "Seu app de rolês: registre noites, acompanhe hidratação e recuperação, compartilhe momentos e reviva experiências com amigos.
-Reviva Seus Rolês!" },
+      { property: "og:description", content: "Seu app de rolês: registre noites, acompanhe hidratação e recuperação, compartilhe momentos e reviva experiências com amigos. Reviva Seus Rolês!" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Destrava — reviva sua noite" },
-      { name: "twitter:description", content: "Seu app de rolês: registre noites, acompanhe hidratação e recuperação, compartilhe momentos e reviva experiências com amigos.
-Reviva Seus Rolês!" },
+      { name: "twitter:description", content: "Seu app de rolês: registre noites, acompanhe hidratação e recuperação, compartilhe momentos e reviva experiências com amigos. Reviva Seus Rolês!" },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/1201be20-6fff-4c57-a3fa-7372839a09c4" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/1201be20-6fff-4c57-a3fa-7372839a09c4" },
     ],

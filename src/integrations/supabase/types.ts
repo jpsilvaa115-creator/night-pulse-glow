@@ -14,6 +14,124 @@ export type Database = {
   }
   public: {
     Tables: {
+      drinks: {
+        Row: {
+          abv: number
+          amount_ml: number
+          created_at: string
+          id: string
+          night_id: string
+          time: string
+          type: string
+        }
+        Insert: {
+          abv?: number
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          night_id: string
+          time?: string
+          type: string
+        }
+        Update: {
+          abv?: number
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          night_id?: string
+          time?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drinks_night_id_fkey"
+            columns: ["night_id"]
+            isOneToOne: false
+            referencedRelation: "nights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      night_venues: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          night_id: string
+          time: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          night_id: string
+          time?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          night_id?: string
+          time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "night_venues_night_id_fkey"
+            columns: ["night_id"]
+            isOneToOne: false
+            referencedRelation: "nights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nights: {
+        Row: {
+          city: string
+          created_at: string
+          ended_at: string | null
+          hydration_ml: number
+          id: string
+          likes_count: number
+          neighborhood: string
+          photo_url: string | null
+          started_at: string
+          title: string
+          updated_at: string
+          user_id: string
+          vibe: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          ended_at?: string | null
+          hydration_ml?: number
+          id?: string
+          likes_count?: number
+          neighborhood?: string
+          photo_url?: string | null
+          started_at?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+          vibe?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          ended_at?: string | null
+          hydration_ml?: number
+          id?: string
+          likes_count?: number
+          neighborhood?: string
+          photo_url?: string | null
+          started_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          vibe?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string

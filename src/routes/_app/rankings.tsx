@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { Trophy, Crown, Medal, Sparkles } from "lucide-react";
 import {
   RANK_META,
-  getRanking,
-  getUser,
+  computeRanking,
   type RankCategory,
   type RankRow,
+  type Night,
 } from "@/lib/destrava-store";
+import { fetchAllNights } from "@/lib/nights-api";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app/rankings")({
   head: () => ({ meta: [{ title: "Rankings — Destrava" }] }),
@@ -17,14 +19,20 @@ export const Route = createFileRoute("/_app/rankings")({
 const CATEGORIES: RankCategory[] = ["nights", "hydration", "explorer", "survivor", "badges"];
 
 function Rankings() {
+  const { user } = useAuth();
+  const meId = user?.id ?? null;
   const [cat, setCat] = useState<RankCategory>("nights");
+  const [nights, setNights] = useState<Night[]>([]);
   const [rows, setRows] = useState<RankRow[]>([]);
-  const [meId, setMeId] = useState<string | null>(null);
 
+  useEffect(() => { fetchAllNights().then(setNights); }, []);
   useEffect(() => {
-    setRows(getRanking(cat));
-    setMeId(getUser()?.id ?? null);
-  }, [cat]);
+    const me = user
+      ? { id: user.id, username: (user.email?.split("@")[0] ?? "voce"), bio: "" }
+      : null;
+    setRows(computeRanking(cat, nights, me));
+  }, [cat, nights, user]);
+
 
   const meta = RANK_META[cat];
   const myIndex = rows.findIndex((r) => r.user.id === meId);

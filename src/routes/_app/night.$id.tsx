@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon } from "lucide-react";
 import {
-  getNight, saveNight, intensity, recommendedWaterMl, estimateBAC,
-  computeBadges, pureAlcoholG, recommendedRestH,
+  intensity, recommendedWaterMl, estimateBAC,
+  computeBadges, pureAlcoholG, recommendedRestH, type Night,
 } from "@/lib/destrava-store";
+import { fetchNight, addHydration } from "@/lib/nights-api";
 
 export const Route = createFileRoute("/_app/night/$id")({
   head: () => ({ meta: [{ title: "Resumo da noite — Destrava" }] }),
@@ -23,8 +24,26 @@ function NotFound() {
 
 function NightSummary() {
   const { id } = useParams({ from: "/_app/night/$id" });
-  const [night, setNight] = useState(() => getNight(id));
+  const [night, setNight] = useState<Night | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchNight(id).then((n) => {
+      if (cancelled) return;
+      setNight(n);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto max-w-2xl px-4 sm:px-6 py-10">
+        <div className="glass rounded-3xl h-64 animate-pulse" />
+      </div>
+    );
+  }
   if (!night) return <NotFound />;
 
   const ints = intensity(night.drinks);
@@ -34,9 +53,9 @@ function NightSummary() {
   const totalAlcoholG = night.drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
   const hydrationPct = Math.min(100, Math.round((night.hydrationMl / water) * 100));
 
-  const drink250 = () => {
-    const next = { ...night, hydrationMl: night.hydrationMl + 250 };
-    setNight(next); saveNight(next);
+  const drink250 = async () => {
+    const next = await addHydration(night.id, 250);
+    setNight({ ...night, hydrationMl: next });
   };
 
   const start = new Date(night.startedAt).getTime();
@@ -45,7 +64,6 @@ function NightSummary() {
   const metabolizeH = Math.ceil(totalAlcoholG / 8);
   const restH = recommendedRestH(night.drinks);
 
-  // build timeline
   const events = [
     ...night.drinks.map((d) => ({ time: d.time, label: d.type, kind: "drink" as const })),
     ...night.venues.map((v) => ({ time: v.time, label: `📍 ${v.name}`, kind: "venue" as const })),
@@ -53,11 +71,10 @@ function NightSummary() {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 sm:px-6 py-6 space-y-5">
-      {/* Wrapped-style hero */}
       <section className="relative rounded-3xl overflow-hidden p-8 text-center bg-gradient-to-br from-primary via-accent to-background animate-fade-up">
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-0 left-1/4 h-40 w-40 rounded-full bg-cyan blur-3xl animate-float" />
-          <div className="absolute bottom-0 right-1/4 h-40 w-40 rounded-full bg-neon blur-3xl animate-float" style={{animationDelay:"1.5s"}} />
+          <div className="absolute bottom-0 right-1/4 h-40 w-40 rounded-full bg-neon blur-3xl animate-float" style={{ animationDelay: "1.5s" }} />
         </div>
         <div className="relative">
           <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-widest font-semibold mb-3 text-white/80">
@@ -94,7 +111,6 @@ function NightSummary() {
         </div>
       </section>
 
-      {/* Intensity bar */}
       <section className="glass rounded-3xl p-6">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-display font-bold">Intensidade da noite</h3>
@@ -112,7 +128,6 @@ function NightSummary() {
         </div>
       </section>
 
-      {/* Hydration */}
       <section className="glass rounded-3xl p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -125,14 +140,13 @@ function NightSummary() {
           <div className="h-full bg-cyan rounded-full glow-cyan transition-all" style={{ width: `${hydrationPct}%` }} />
         </div>
         <p className="text-sm text-muted-foreground mb-3">
-          💧 Recomendado: <strong className="text-foreground">{(water/1000).toFixed(1)}L</strong> — pequenas pausas ajudam.
+          💧 Recomendado: <strong className="text-foreground">{(water / 1000).toFixed(1)}L</strong> — pequenas pausas ajudam.
         </p>
         <button onClick={drink250} className="w-full px-4 py-3 rounded-xl bg-cyan/20 border border-cyan/40 text-cyan font-semibold hover:bg-cyan/30 transition-colors">
           + 250ml — Já bebi água
         </button>
       </section>
 
-      {/* Rest / recovery */}
       <section className="glass rounded-3xl p-6">
         <div className="flex items-center gap-2 mb-3">
           <Moon className="h-5 w-5 text-primary" />
@@ -148,7 +162,6 @@ function NightSummary() {
         </p>
       </section>
 
-      {/* Responsible alerts */}
       {ints.pct > 60 && (
         <section className="rounded-3xl p-5 border border-warning/40 bg-warning/10 flex gap-3 animate-fade-up">
           <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
@@ -161,7 +174,6 @@ function NightSummary() {
         </section>
       )}
 
-      {/* Timeline */}
       <section className="glass rounded-3xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Clock className="h-5 w-5 text-primary" />
@@ -183,7 +195,6 @@ function NightSummary() {
         </div>
       </section>
 
-      {/* Badges */}
       <section className="glass rounded-3xl p-6">
         <h3 className="font-display font-bold mb-3">Badges desbloqueadas</h3>
         <div className="flex flex-wrap gap-2">
