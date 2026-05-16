@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Night photos are publicly accessible" ON storage.objects;
