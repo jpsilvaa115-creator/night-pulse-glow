@@ -11,12 +11,12 @@ import {
   getFriends,
   getIncomingRequests,
   getOutgoingRequests,
-  getUser,
   removeFriend,
   searchUsers,
   sendFriendRequest,
   type PublicUser,
 } from "@/lib/destrava-store";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app/friends")({
   head: () => ({ meta: [{ title: "Amigos — Destrava" }] }),
@@ -24,18 +24,18 @@ export const Route = createFileRoute("/_app/friends")({
 });
 
 function Friends() {
+  const { user } = useAuth();
+  const meId = user?.id ?? null;
   const [tick, setTick] = useState(0);
   const [q, setQ] = useState("");
-  const [meId, setMeId] = useState<string | null>(null);
-
-  useEffect(() => { setMeId(getUser()?.id ?? null); }, []);
 
   const refresh = () => setTick((t) => t + 1);
 
-  const friends = useMemo(() => getFriends().map(findUser).filter(Boolean) as PublicUser[], [tick]);
-  const incoming = useMemo(() => getIncomingRequests().map(findUser).filter(Boolean) as PublicUser[], [tick]);
-  const outgoing = useMemo(() => getOutgoingRequests().map(findUser).filter(Boolean) as PublicUser[], [tick]);
+  const friends = useMemo(() => getFriends().map((id) => findUser(id)).filter(Boolean) as PublicUser[], [tick]);
+  const incoming = useMemo(() => getIncomingRequests().map((id) => findUser(id)).filter(Boolean) as PublicUser[], [tick]);
+  const outgoing = useMemo(() => getOutgoingRequests().map((id) => findUser(id)).filter(Boolean) as PublicUser[], [tick]);
   const results = useMemo(() => (q ? searchUsers(q) : getAllUsers().filter((u) => u.id !== meId).slice(0, 8)), [q, meId, tick]);
+
 
   return (
     <div className="container mx-auto max-w-2xl px-4 sm:px-6 py-6 space-y-5">
