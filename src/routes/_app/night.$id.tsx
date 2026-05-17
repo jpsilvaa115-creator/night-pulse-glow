@@ -1,11 +1,20 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon } from "lucide-react";
+import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon, Heart, MessageCircle, Send, Trash2 } from "lucide-react";
 import {
   intensity, recommendedWaterMl, estimateBAC,
   computeBadges, pureAlcoholG, recommendedRestH, type Night,
 } from "@/lib/destrava-store";
 import { fetchNight, addHydration } from "@/lib/nights-api";
+import {
+  addComment,
+  deleteComment,
+  fetchComments,
+  fetchMyLikedNightIds,
+  toggleLike,
+  type CommentRow,
+} from "@/lib/social-api";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app/night/$id")({
   head: () => ({ meta: [{ title: "Resumo da noite — Destrava" }] }),
