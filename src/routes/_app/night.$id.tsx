@@ -249,6 +249,85 @@ function NightSummary() {
           ))}
         </div>
       </section>
+
+      <section className="glass rounded-3xl p-6">
+        <div className="flex items-center gap-5 pb-4 border-b border-border">
+          <button
+            onClick={handleLike}
+            disabled={!user}
+            className={`flex items-center gap-2 transition-colors ${liked ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`}
+          >
+            <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+            <span className="font-mono font-bold">{night.likes}</span>
+          </button>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <MessageCircle className="h-5 w-5" />
+            <span className="font-mono font-bold">{comments.length}</span>
+          </div>
+        </div>
+
+        <div className="space-y-3 mt-4">
+          {comments.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-3">
+              ainda sem comentários — sê o primeiro 👇
+            </p>
+          )}
+          {comments.map((c) => (
+            <div key={c.id} className="flex items-start gap-3 group">
+              <Link to="/u/$id" params={{ id: c.user_id }} className="h-9 w-9 rounded-full bg-gradient-neon grid place-items-center text-xs font-bold shrink-0 overflow-hidden">
+                {c.profile?.photo_url
+                  ? <img src={c.profile.photo_url} alt="" className="h-full w-full object-cover" />
+                  : (c.profile?.username ?? "?").slice(0, 1).toUpperCase()}
+              </Link>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <Link to="/u/$id" params={{ id: c.user_id }} className="text-sm font-semibold hover:underline">
+                    @{c.profile?.username ?? "anon"}
+                  </Link>
+                  <span className="text-[10px] text-muted-foreground">
+                    {new Date(c.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+                  </span>
+                </div>
+                <p className="text-sm text-foreground/90 break-words">{c.text}</p>
+              </div>
+              {user?.id === c.user_id && (
+                <button
+                  onClick={() => handleDeleteComment(c.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition"
+                  aria-label="Apagar comentário"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {user ? (
+          <div className="mt-4 flex items-center gap-2">
+            <input
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleComment(); }}
+              placeholder="adiciona um comentário…"
+              maxLength={500}
+              className="flex-1 bg-input rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-sm"
+            />
+            <button
+              onClick={handleComment}
+              disabled={!newComment.trim() || posting}
+              className="h-10 w-10 rounded-xl bg-gradient-neon grid place-items-center disabled:opacity-40"
+              aria-label="Enviar"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            <Link to="/login" className="text-primary hover:underline">entra</Link> pra comentar
+          </p>
+        )}
+      </section>
     </div>
   );
 }
