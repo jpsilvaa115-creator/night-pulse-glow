@@ -1,8 +1,9 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, type ReactNode } from "react";
-import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles, Trophy, Users } from "lucide-react";
+import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles, Trophy, Users, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { unreadNotificationsCount } from "@/lib/social-api";
 
 type Profile = { username: string; bio: string };
 
@@ -12,6 +13,7 @@ const NAV = [
   { to: "/new-night", label: "Nova noite", icon: Plus, accent: true },
   { to: "/rankings", label: "Rankings", icon: Trophy },
   { to: "/friends", label: "Amigos", icon: Users },
+  { to: "/notifications", label: "Notificações", icon: Bell },
   { to: "/map", label: "Mapa", icon: MapPin },
   { to: "/profile", label: "Perfil", icon: User },
 ];
