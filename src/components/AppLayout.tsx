@@ -21,6 +21,7 @@ const NAV = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [unread, setUnread] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -28,12 +29,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => { setOpen(false); }, [path]);
 
   useEffect(() => {
-    if (!user) { setProfile(null); return; }
+    if (!user) { setProfile(null); setUnread(0); return; }
     let cancelled = false;
     supabase.from("profiles").select("username, bio").eq("id", user.id).maybeSingle()
       .then(({ data }) => { if (!cancelled && data) setProfile(data); });
+    unreadNotificationsCount(user.id).then((n) => { if (!cancelled) setUnread(n); });
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, path]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
