@@ -2,7 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, MapPin, Share2, Flame, Sparkles } from "lucide-react";
 import { intensity, computeBadges, type Night } from "@/lib/destrava-store";
-import { fetchAllNights, likeNight } from "@/lib/nights-api";
+import { fetchAllNights } from "@/lib/nights-api";
+import {
+  fetchMyLikedNightIds,
+  fetchProfilesByIds,
+  toggleLike,
+  type Profile,
+} from "@/lib/social-api";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app/feed")({
   head: () => ({ meta: [{ title: "Feed — Destrava" }] }),
@@ -10,22 +17,41 @@ export const Route = createFileRoute("/_app/feed")({
 });
 
 function Feed() {
+  const { user } = useAuth();
   const [nights, setNights] = useState<Night[]>([]);
   const [loading, setLoading] = useState(true);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
+  const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
-    fetchAllNights().then((data) => {
+    (async () => {
+      const data = await fetchAllNights();
       if (cancelled) return;
       setNights(data);
+      const profMap = await fetchProfilesByIds(data.map((n) => n.userId));
+      if (cancelled) return;
+      setProfiles(profMap);
+      if (user) {
+        const s = await fetchMyLikedNightIds(user.id);
+        if (!cancelled) setLiked(s);
+      }
       setLoading(false);
-    });
+    })();
     return () => { cancelled = true; };
-  }, []);
+  }, [user]);
 
-  const like = async (id: string) => {
-    setNights((prev) => prev.map((n) => n.id === id ? { ...n, likes: n.likes + 1 } : n));
-    await likeNight(id).catch(() => {});
+  const handleLike = async (id: string) => {
+    if (!user) return;
+    const isLiked = liked.has(id);
+    setLiked((prev) => {
+      const next = new Set(prev);
+      if (isLiked) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    setNights((prev) => prev.map((n) => n.id === id ? { ...n, likes: n.likes + (isLiked ? -1 : 1) } : n));
+    await toggleLike(user.id, id, isLiked);
   };
 
   return (
@@ -57,6 +83,8 @@ function Feed() {
       {nights.map((n, i) => {
         const ints = intensity(n.drinks);
         const badges = computeBadges(n);
+        const isLiked = liked.has(n.id);
+        const author = profiles.get(n.userId);
         return (
           <article
             key={n.id}
@@ -64,11 +92,15 @@ function Feed() {
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="p-5 flex items-center gap-3">
-              <div className="h-11 w-11 rounded-full bg-gradient-neon grid place-items-center text-sm font-bold">
-                {n.userId.slice(0, 1).toUpperCase()}
-              </div>
+              <Link to="/u/$id" params={{ id: n.userId }} className="h-11 w-11 rounded-full bg-gradient-neon grid place-items-center text-sm font-bold overflow-hidden shrink-0">
+                {author?.photo_url
+                  ? <img src={author.photo_url} alt={author.username} className="h-full w-full object-cover" />
+                  : (author?.username ?? n.userId).slice(0, 1).toUpperCase()}
+              </Link>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm">@{n.userId.slice(0, 6)}</div>
+                <Link to="/u/$id" params={{ id: n.userId }} className="font-semibold text-sm hover:underline">
+                  @{author?.username ?? n.userId.slice(0, 6)}
+                </Link>
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" /> {n.city || "—"}
                 </div>
@@ -103,12 +135,21 @@ function Feed() {
             </div>
 
             <div className="p-5 flex items-center gap-5 text-sm">
-              <button onClick={() => like(n.id)} className="flex items-center gap-1.5 hover:text-destructive transition-colors">
-                <Heart className="h-5 w-5" /> {n.likes}
+              <button
+                onClick={() => handleLike(n.id)}
+                disabled={!user}
+                className={`flex items-center gap-1.5 transition-colors ${isLiked ? "text-destructive" : "hover:text-destructive"}`}
+                aria-label="Curtir"
+              >
+                <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} /> {n.likes}
               </button>
-              <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
-                <MessageCircle className="h-5 w-5" /> {n.comments.length}
-              </button>
+              <Link
+                to="/night/$id"
+                params={{ id: n.id }}
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <MessageCircle className="h-5 w-5" /> comentar
+              </Link>
               <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground ml-auto">
                 <Share2 className="h-5 w-5" />
               </button>

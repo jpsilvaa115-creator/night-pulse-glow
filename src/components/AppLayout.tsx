@@ -1,8 +1,9 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, type ReactNode } from "react";
-import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles, Trophy, Users } from "lucide-react";
+import { Menu, Home, BarChart3, Plus, User, MapPin, LogOut, Sparkles, Trophy, Users, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { unreadNotificationsCount } from "@/lib/social-api";
 
 type Profile = { username: string; bio: string };
 
@@ -12,6 +13,7 @@ const NAV = [
   { to: "/new-night", label: "Nova noite", icon: Plus, accent: true },
   { to: "/rankings", label: "Rankings", icon: Trophy },
   { to: "/friends", label: "Amigos", icon: Users },
+  { to: "/notifications", label: "Notificações", icon: Bell },
   { to: "/map", label: "Mapa", icon: MapPin },
   { to: "/profile", label: "Perfil", icon: User },
 ];
@@ -19,6 +21,7 @@ const NAV = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [unread, setUnread] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -26,12 +29,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => { setOpen(false); }, [path]);
 
   useEffect(() => {
-    if (!user) { setProfile(null); return; }
+    if (!user) { setProfile(null); setUnread(0); return; }
     let cancelled = false;
     supabase.from("profiles").select("username, bio").eq("id", user.id).maybeSingle()
       .then(({ data }) => { if (!cancelled && data) setProfile(data); });
+    unreadNotificationsCount(user.id).then((n) => { if (!cancelled) setUnread(n); });
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, path]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -59,6 +63,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {NAV.map((item) => {
             const Icon = item.icon;
             const active = path === item.to;
+            const showBadge = item.to === "/notifications" && unread > 0;
             return (
               <Link
                 key={item.to}
@@ -72,7 +77,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {showBadge && (
+                  <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-destructive text-destructive-foreground min-w-[18px] text-center">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                )}
               </Link>
             );
           })}

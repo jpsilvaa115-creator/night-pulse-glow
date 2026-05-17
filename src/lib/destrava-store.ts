@@ -1,6 +1,5 @@
 // Types and pure helpers for Destrava.
-// Data persistence lives in `nights-api.ts` (real backend) and `useAuth`.
-// Friendships and the mock community list are still local — Phase 3 replaces them.
+// All persistence (nights, profiles, social) lives in `nights-api.ts` / `social-api.ts`.
 
 export type Drink = {
   id: string;
@@ -26,13 +25,6 @@ export type Night = {
   vibe: "chill" | "social" | "lendaria" | "after";
   likes: number;
   comments: { user: string; text: string }[];
-};
-
-export type PublicUser = {
-  id: string;
-  username: string;
-  bio: string;
-  city?: string;
 };
 
 // ============= Drink presets / Widmark helpers =============
@@ -89,87 +81,10 @@ export function computeBadges(n: Night): string[] {
   return badges;
 }
 
-// ============= Public mock community (Phase 3 will replace with profiles) =============
-export const PUBLIC_USERS: PublicUser[] = [
-  { id: "u_lua", username: "lua", bio: "noite é vida 🌙", city: "São Paulo" },
-  { id: "u_theo", username: "theo", bio: "after enthusiast", city: "Rio de Janeiro" },
-  { id: "u_rafa", username: "rafa", bio: "barzinho > balada", city: "São Paulo" },
-  { id: "u_bia", username: "bia", bio: "hidratada sempre 💧", city: "Belo Horizonte" },
-  { id: "u_caio", username: "caio", bio: "modo lendário", city: "Curitiba" },
-  { id: "u_mari", username: "mari", bio: "vinho e conversa", city: "Porto Alegre" },
-  { id: "u_dudu", username: "dudu", bio: "track every roll", city: "Florianópolis" },
-  { id: "u_juju", username: "juju", bio: "saideira nunca é a última", city: "Recife" },
-];
+// ============= Rankings (pure compute over real profiles + nights) =============
+import type { Profile } from "./social-api";
 
-export function getAllUsers(me?: PublicUser | null): PublicUser[] {
-  const list = [...PUBLIC_USERS];
-  if (me && !list.some((u) => u.id === me.id)) list.unshift(me);
-  return list;
-}
-export function findUser(id: string, me?: PublicUser | null): PublicUser | undefined {
-  return getAllUsers(me).find((u) => u.id === id);
-}
-export function searchUsers(q: string, me?: PublicUser | null): PublicUser[] {
-  const t = q.trim().toLowerCase();
-  if (!t) return [];
-  return getAllUsers(me).filter(
-    (u) => u.username.toLowerCase().includes(t) || u.bio.toLowerCase().includes(t),
-  );
-}
-
-// ============= Friendships (local mock — Phase 3 will replace) =============
-const KEY_FRIENDS = "destrava.friends";
-const KEY_REQUESTS_OUT = "destrava.requests.out";
-const KEY_REQUESTS_IN = "destrava.requests.in";
-
-function readSet(key: string): string[] {
-  if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
-}
-function writeSet(key: string, arr: string[]) {
-  localStorage.setItem(key, JSON.stringify(Array.from(new Set(arr))));
-}
-
-export function getFriends(): string[] { return readSet(KEY_FRIENDS); }
-export function getOutgoingRequests(): string[] { return readSet(KEY_REQUESTS_OUT); }
-export function getIncomingRequests(): string[] {
-  if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(KEY_REQUESTS_IN);
-  if (raw === null) {
-    const seed = ["u_bia", "u_dudu"];
-    writeSet(KEY_REQUESTS_IN, seed);
-    return seed;
-  }
-  return readSet(KEY_REQUESTS_IN);
-}
-
-export function friendshipStatus(id: string, meId?: string | null): "self" | "friends" | "outgoing" | "incoming" | "none" {
-  if (meId && meId === id) return "self";
-  if (getFriends().includes(id)) return "friends";
-  if (getOutgoingRequests().includes(id)) return "outgoing";
-  if (getIncomingRequests().includes(id)) return "incoming";
-  return "none";
-}
-
-export function sendFriendRequest(id: string) {
-  writeSet(KEY_REQUESTS_OUT, [...getOutgoingRequests(), id]);
-}
-export function cancelFriendRequest(id: string) {
-  writeSet(KEY_REQUESTS_OUT, getOutgoingRequests().filter((x) => x !== id));
-}
-export function acceptFriendRequest(id: string) {
-  writeSet(KEY_REQUESTS_IN, getIncomingRequests().filter((x) => x !== id));
-  writeSet(KEY_FRIENDS, [...getFriends(), id]);
-}
-export function declineFriendRequest(id: string) {
-  writeSet(KEY_REQUESTS_IN, getIncomingRequests().filter((x) => x !== id));
-}
-export function removeFriend(id: string) {
-  writeSet(KEY_FRIENDS, getFriends().filter((x) => x !== id));
-}
-
-// ============= Rankings =============
-export type RankRow = { user: PublicUser; value: number; label: string };
+export type RankRow = { user: Profile; value: number; label: string };
 export type RankCategory = "nights" | "hydration" | "explorer" | "survivor" | "badges";
 
 export const RANK_META: Record<RankCategory, { title: string; emoji: string; sub: string; unit: (v: number) => string }> = {
@@ -182,7 +97,6 @@ export const RANK_META: Record<RankCategory, { title: string; emoji: string; sub
 
 function statsForUser(userId: string, nights: Night[]) {
   const ns = nights.filter((n) => n.userId === userId);
-  const totalNights = ns.length;
   const totalHydration = ns.reduce((a, n) => a + (n.hydrationMl || 0), 0);
   const venues = new Set(ns.flatMap((n) => n.venues.map((v) => v.name))).size;
   const badges = ns.flatMap(computeBadges).length;
@@ -192,12 +106,15 @@ function statsForUser(userId: string, nights: Night[]) {
       (n) => (new Date(n.endedAt ?? n.startedAt).getTime() - new Date(n.startedAt).getTime()) / 3600000,
     ),
   );
-  return { totalNights, totalHydration, venues, badges, longest };
+  return { totalNights: ns.length, totalHydration, venues, badges, longest };
 }
 
-export function computeRanking(cat: RankCategory, nights: Night[], me?: PublicUser | null): RankRow[] {
-  const users = getAllUsers(me);
-  const rows: RankRow[] = users.map((u) => {
+export function computeRanking(
+  cat: RankCategory,
+  nights: Night[],
+  profiles: Profile[],
+): RankRow[] {
+  const rows: RankRow[] = profiles.map((u) => {
     const s = statsForUser(u.id, nights);
     let value = 0;
     switch (cat) {
@@ -209,14 +126,5 @@ export function computeRanking(cat: RankCategory, nights: Night[], me?: PublicUs
     }
     return { user: u, value, label: RANK_META[cat].unit(value) };
   });
-  return rows
-    .map((r) => {
-      if (r.value > 0) return r;
-      const seed = r.user.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-      let fake = (seed % 7) + 1;
-      if (cat === "hydration") fake = 1500 + (seed % 9) * 250;
-      if (cat === "survivor")  fake = 4 + (seed % 7);
-      return { ...r, value: fake, label: RANK_META[cat].unit(fake) };
-    })
-    .sort((a, b) => b.value - a.value);
+  return rows.filter((r) => r.value > 0).sort((a, b) => b.value - a.value);
 }

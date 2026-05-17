@@ -17,6 +17,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRankingsRouteImport } from './routes/_app/rankings'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppNewNightRouteImport } from './routes/_app/new-night'
 import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
@@ -62,6 +63,11 @@ const AppRankingsRoute = AppRankingsRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNewNightRoute = AppNewNightRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AppFriendsRoute
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
+  '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/friends': typeof AppFriendsRoute
   '/map': typeof AppMapRoute
   '/new-night': typeof AppNewNightRoute
+  '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
   '/rankings': typeof AppRankingsRoute
   '/night/$id': typeof AppNightIdRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/_app/friends': typeof AppFriendsRoute
   '/_app/map': typeof AppMapRoute
   '/_app/new-night': typeof AppNewNightRoute
+  '/_app/notifications': typeof AppNotificationsRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/rankings': typeof AppRankingsRoute
   '/_app/night/$id': typeof AppNightIdRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/map'
     | '/new-night'
+    | '/notifications'
     | '/profile'
     | '/rankings'
     | '/night/$id'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/map'
     | '/new-night'
+    | '/notifications'
     | '/profile'
     | '/rankings'
     | '/night/$id'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/_app/friends'
     | '/_app/map'
     | '/_app/new-night'
+    | '/_app/notifications'
     | '/_app/profile'
     | '/_app/rankings'
     | '/_app/night/$id'
@@ -269,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/new-night': {
       id: '/_app/new-night'
       path: '/new-night'
@@ -327,6 +346,7 @@ interface AppRouteChildren {
   AppFriendsRoute: typeof AppFriendsRoute
   AppMapRoute: typeof AppMapRoute
   AppNewNightRoute: typeof AppNewNightRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRankingsRoute: typeof AppRankingsRoute
   AppNightIdRoute: typeof AppNightIdRoute
@@ -339,6 +359,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFriendsRoute: AppFriendsRoute,
   AppMapRoute: AppMapRoute,
   AppNewNightRoute: AppNewNightRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRankingsRoute: AppRankingsRoute,
   AppNightIdRoute: AppNightIdRoute,
