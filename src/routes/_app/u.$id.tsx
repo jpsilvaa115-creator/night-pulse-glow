@@ -1,18 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, MapPin, UserPlus, UserCheck, UserX, Clock } from "lucide-react";
+import { computeBadges, type Night } from "@/lib/destrava-store";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
-  computeBadges,
   declineFriendRequest,
-  findUser,
-  friendshipStatus,
+  fetchFriendshipMap,
+  fetchProfile,
   removeFriend,
   sendFriendRequest,
-  type Night,
-  type PublicUser,
-} from "@/lib/destrava-store";
+  type FriendshipStatus,
+  type Profile,
+} from "@/lib/social-api";
 import { fetchNightsByUser } from "@/lib/nights-api";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -26,14 +26,24 @@ function PublicProfile() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const meId = user?.id ?? null;
-  const [u, setU] = useState<PublicUser | null>(null);
-  const [tick, setTick] = useState(0);
+  const [u, setU] = useState<Profile | null>(null);
   const [nights, setNights] = useState<Night[]>([]);
+  const [status, setStatus] = useState<FriendshipStatus>("none");
 
-  useEffect(() => {
-    setU(findUser(id) ?? null);
-    fetchNightsByUser(id).then(setNights);
-  }, [id, tick]);
+  const reload = useCallback(async () => {
+    const [p, ns] = await Promise.all([fetchProfile(id), fetchNightsByUser(id)]);
+    setU(p);
+    setNights(ns);
+    if (meId) {
+      if (meId === id) setStatus("self");
+      else {
+        const map = await fetchFriendshipMap(meId);
+        setStatus(map.get(id) ?? "none");
+      }
+    }
+  }, [id, meId]);
+
+  useEffect(() => { reload(); }, [reload]);
 
   if (!u) {
     return (
@@ -44,13 +54,9 @@ function PublicProfile() {
     );
   }
 
-  const status = friendshipStatus(u.id, meId);
   const isMe = status === "self";
   const badges = Array.from(new Set(nights.flatMap(computeBadges)));
   const venues = new Set(nights.flatMap((n) => n.venues.map((v) => v.name))).size;
-
-  const refresh = () => setTick((t) => t + 1);
-
 
   return (
     <div className="container mx-auto max-w-2xl px-4 sm:px-6 py-6 space-y-5">
@@ -59,8 +65,10 @@ function PublicProfile() {
       </button>
 
       <section className="glass rounded-3xl p-6 text-center">
-        <div className="h-24 w-24 mx-auto rounded-full bg-gradient-neon grid place-items-center text-3xl font-display font-bold glow-neon">
-          {u.username.slice(0, 1).toUpperCase()}
+        <div className="h-24 w-24 mx-auto rounded-full bg-gradient-neon grid place-items-center text-3xl font-display font-bold glow-neon overflow-hidden">
+          {u.photo_url
+            ? <img src={u.photo_url} alt={u.username} className="h-full w-full object-cover" />
+            : u.username.slice(0, 1).toUpperCase()}
         </div>
         <h1 className="text-2xl font-display font-bold mt-4">@{u.username}</h1>
         <p className="text-sm text-muted-foreground mt-1">{u.bio || "sem bio"}</p>
@@ -70,26 +78,26 @@ function PublicProfile() {
           </p>
         )}
 
-        {!isMe && (
+        {!isMe && meId && (
           <div className="mt-4 flex justify-center">
             {status === "none" && (
-              <button onClick={() => { sendFriendRequest(u.id); refresh(); }} className="px-5 py-2.5 rounded-xl bg-gradient-neon font-semibold glow-neon flex items-center gap-2">
+              <button onClick={async () => { await sendFriendRequest(meId, u.id); reload(); }} className="px-5 py-2.5 rounded-xl bg-gradient-neon font-semibold glow-neon flex items-center gap-2">
                 <UserPlus className="h-4 w-4" /> Adicionar amigo
               </button>
             )}
             {status === "outgoing" && (
-              <button onClick={() => { cancelFriendRequest(u.id); refresh(); }} className="px-5 py-2.5 rounded-xl bg-secondary font-semibold text-muted-foreground flex items-center gap-2">
+              <button onClick={async () => { await cancelFriendRequest(meId, u.id); reload(); }} className="px-5 py-2.5 rounded-xl bg-secondary font-semibold text-muted-foreground flex items-center gap-2">
                 <Clock className="h-4 w-4" /> Pedido enviado
               </button>
             )}
             {status === "incoming" && (
               <div className="flex gap-2">
-                <button onClick={() => { acceptFriendRequest(u.id); refresh(); }} className="px-5 py-2.5 rounded-xl bg-gradient-neon font-semibold">Aceitar pedido</button>
-                <button onClick={() => { declineFriendRequest(u.id); refresh(); }} className="px-5 py-2.5 rounded-xl bg-secondary font-semibold text-muted-foreground">Recusar</button>
+                <button onClick={async () => { await acceptFriendRequest(meId, u.id); reload(); }} className="px-5 py-2.5 rounded-xl bg-gradient-neon font-semibold">Aceitar pedido</button>
+                <button onClick={async () => { await declineFriendRequest(meId, u.id); reload(); }} className="px-5 py-2.5 rounded-xl bg-secondary font-semibold text-muted-foreground">Recusar</button>
               </div>
             )}
             {status === "friends" && (
-              <button onClick={() => { removeFriend(u.id); refresh(); }} className="px-5 py-2.5 rounded-xl bg-success/20 text-success font-semibold flex items-center gap-2 hover:bg-destructive/20 hover:text-destructive group">
+              <button onClick={async () => { await removeFriend(meId, u.id); reload(); }} className="px-5 py-2.5 rounded-xl bg-success/20 text-success font-semibold flex items-center gap-2 hover:bg-destructive/20 hover:text-destructive group">
                 <UserCheck className="h-4 w-4 group-hover:hidden" />
                 <UserX className="h-4 w-4 hidden group-hover:block" />
                 <span className="group-hover:hidden">Amigos</span>
