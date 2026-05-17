@@ -95,17 +95,7 @@ export async function addHydration(nightId: string, ml: number): Promise<number>
   return next;
 }
 
-export async function likeNight(nightId: string): Promise<number> {
-  // Optimistic +1; Phase 3 will replace with a proper likes table.
-  const { data: cur } = await supabase
-    .from("nights")
-    .select("likes_count")
-    .eq("id", nightId)
-    .maybeSingle();
-  const next = (cur?.likes_count ?? 0) + 1;
-  await supabase.from("nights").update({ likes_count: next }).eq("id", nightId);
-  return next;
-}
+// Likes are owned by social-api.ts (Phase 3): `toggleLike(meId, nightId, liked)`.
 
 export type CreateNightInput = {
   title: string;
