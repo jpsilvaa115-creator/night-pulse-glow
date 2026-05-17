@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      comments: {
+        Row: {
+          created_at: string
+          id: string
+          night_id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          night_id: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          night_id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_night_id_fkey"
+            columns: ["night_id"]
+            isOneToOne: false
+            referencedRelation: "nights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drinks: {
         Row: {
           abv: number
@@ -45,6 +77,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "drinks_night_id_fkey"
+            columns: ["night_id"]
+            isOneToOne: false
+            referencedRelation: "nights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      likes: {
+        Row: {
+          created_at: string
+          id: string
+          night_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          night_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          night_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_night_id_fkey"
             columns: ["night_id"]
             isOneToOne: false
             referencedRelation: "nights"
@@ -131,6 +219,54 @@ export type Database = {
           vibe?: string
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          night_id: string | null
+          read: boolean
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          night_id?: string | null
+          read?: boolean
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          night_id?: string | null
+          read?: boolean
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_night_id_fkey"
+            columns: ["night_id"]
+            isOneToOne: false
+            referencedRelation: "nights"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
