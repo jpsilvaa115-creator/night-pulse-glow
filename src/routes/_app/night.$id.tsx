@@ -33,18 +33,53 @@ function NotFound() {
 
 function NightSummary() {
   const { id } = useParams({ from: "/_app/night/$id" });
+  const { user } = useAuth();
   const [night, setNight] = useState<Night | null>(null);
   const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState<CommentRow[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [liked, setLiked] = useState(false);
+  const [posting, setPosting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetchNight(id).then((n) => {
+    (async () => {
+      const [n, cs] = await Promise.all([fetchNight(id), fetchComments(id)]);
       if (cancelled) return;
       setNight(n);
+      setComments(cs);
       setLoading(false);
-    });
+      if (user) {
+        const s = await fetchMyLikedNightIds(user.id);
+        if (!cancelled) setLiked(s.has(id));
+      }
+    })();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, user]);
+
+  const handleLike = async () => {
+    if (!user || !night) return;
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setNight({ ...night, likes: night.likes + (wasLiked ? -1 : 1) });
+    await toggleLike(user.id, id, wasLiked);
+  };
+
+  const handleComment = async () => {
+    if (!user || !newComment.trim() || posting) return;
+    setPosting(true);
+    const c = await addComment(user.id, id, newComment);
+    if (c) {
+      setComments((prev) => [...prev, c]);
+      setNewComment("");
+    }
+    setPosting(false);
+  };
+
+  const handleDeleteComment = async (cid: string) => {
+    await deleteComment(cid);
+    setComments((prev) => prev.filter((c) => c.id !== cid));
+  };
 
   if (loading) {
     return (
