@@ -63,6 +63,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {NAV.map((item) => {
             const Icon = item.icon;
             const active = path === item.to;
+            const showBadge = item.to === "/notifications" && unread > 0;
             return (
               <Link
                 key={item.to}
@@ -76,7 +77,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {showBadge && (
+                  <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-destructive text-destructive-foreground min-w-[18px] text-center">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                )}
               </Link>
             );
           })}
