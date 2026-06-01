@@ -1,11 +1,13 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon, Heart, MessageCircle, Send, Trash2 } from "lucide-react";
+import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon, Heart, MessageCircle, Send, Trash2, Pencil, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import {
   intensity, recommendedWaterMl, estimateBAC,
   computeBadges, pureAlcoholG, recommendedRestH, type Night,
 } from "@/lib/destrava-store";
-import { fetchNight, addHydration } from "@/lib/nights-api";
+import { fetchNight, addHydration, updateNightTimes, deleteNight } from "@/lib/nights-api";
+import { toLocalInput, fromLocalInput } from "./new-night";
 import {
   addComment,
   deleteComment,
