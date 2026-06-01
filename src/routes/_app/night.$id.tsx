@@ -198,6 +198,55 @@ function NightSummary() {
         </div>
       </section>
 
+      {user?.id === night.userId && (
+        <section className="glass rounded-3xl p-5">
+          {!editingTimes ? (
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h3 className="font-display font-bold text-sm">Gerenciar noite</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Edite os horários ou apague o post.</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={startEditTimes}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary text-sm font-semibold hover:bg-primary/20 transition">
+                  <Pencil className="h-3.5 w-3.5" /> Editar horários
+                </button>
+                <button onClick={handleDeleteNight} disabled={deleting}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-destructive/15 border border-destructive/40 text-destructive text-sm font-semibold hover:bg-destructive/25 transition disabled:opacity-50">
+                  <Trash2 className="h-3.5 w-3.5" /> {deleting ? "Apagando…" : "Apagar"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Chegada</span>
+                  <input type="datetime-local" value={editStart} onChange={(e) => setEditStart(e.target.value)}
+                    className="mt-1 w-full bg-input rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary text-sm" />
+                </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Saída</span>
+                  <input type="datetime-local" value={editEnd} onChange={(e) => setEditEnd(e.target.value)}
+                    className="mt-1 w-full bg-input rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary text-sm" />
+                </label>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setEditingTimes(false)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary text-sm font-semibold">
+                  <X className="h-3.5 w-3.5" /> Cancelar
+                </button>
+                <button onClick={saveTimes} disabled={savingTimes}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-neon text-sm font-semibold glow-neon disabled:opacity-50">
+                  <Check className="h-3.5 w-3.5" /> {savingTimes ? "Salvando…" : "Salvar"}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+
       <section className="glass rounded-3xl p-6">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-display font-bold">Intensidade da noite</h3>
