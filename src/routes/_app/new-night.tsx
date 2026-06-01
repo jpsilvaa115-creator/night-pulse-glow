@@ -91,6 +91,17 @@ function NewNight() {
           </div>
         </Field>
 
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Chegada">
+            <input type="datetime-local" value={startedAt} onChange={(e) => setStartedAt(e.target.value)}
+              className="w-full bg-input rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary text-sm" />
+          </Field>
+          <Field label="Saída">
+            <input type="datetime-local" value={endedAt} onChange={(e) => setEndedAt(e.target.value)}
+              className="w-full bg-input rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary text-sm" />
+          </Field>
+        </div>
+
         <Field label="Vibe">
           <div className="grid grid-cols-4 gap-2">
             {(["chill", "social", "lendaria", "after"] as const).map((v) => (
