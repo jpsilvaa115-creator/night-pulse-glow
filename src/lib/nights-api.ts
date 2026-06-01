@@ -127,6 +127,8 @@ export type CreateNightInput = {
   venue?: string;
   drinks: Drink[];
   photoFile?: File | null;
+  startedAt?: string;
+  endedAt?: string;
 };
 
 export async function createNight(
@@ -150,8 +152,8 @@ export async function createNight(
     }
   }
 
-  const startedAt = input.drinks[0]?.time ?? new Date().toISOString();
-  const endedAt = new Date().toISOString();
+  const startedAt = input.startedAt ?? input.drinks[0]?.time ?? new Date().toISOString();
+  const endedAt = input.endedAt ?? new Date().toISOString();
 
   const { data: nightRow, error } = await supabase
     .from("nights")
