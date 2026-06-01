@@ -22,6 +22,9 @@ function NewNight() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+  const nowLocal = toLocalInput(new Date());
+  const [startedAt, setStartedAt] = useState<string>(nowLocal);
+  const [endedAt, setEndedAt] = useState<string>(nowLocal);
 
   const addDrink = (preset: typeof DRINK_PRESETS[number]) => {
     setDrinks((d) => [...d, {
