@@ -46,6 +46,12 @@ function NewNight() {
   const finish = async () => {
     if (!user) { toast.error("Você precisa estar logado"); return; }
     if (saving) return;
+    const startISO = fromLocalInput(startedAt);
+    const endISO = fromLocalInput(endedAt);
+    if (new Date(endISO).getTime() < new Date(startISO).getTime()) {
+      toast.error("A saída deve ser depois da chegada");
+      return;
+    }
     setSaving(true);
     const id = await createNight(user.id, {
       title: title || "Minha noite",
@@ -54,6 +60,8 @@ function NewNight() {
       venue,
       drinks,
       photoFile,
+      startedAt: startISO,
+      endedAt: endISO,
     });
     setSaving(false);
     if (!id) { toast.error("Não foi possível salvar a noite"); return; }
