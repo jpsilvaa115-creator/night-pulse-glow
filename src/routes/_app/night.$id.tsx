@@ -1,11 +1,13 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon, Heart, MessageCircle, Send, Trash2 } from "lucide-react";
+import { Droplet, Clock, MapPin, AlertTriangle, Share2, Sparkles, LogIn, LogOut, Moon, Heart, MessageCircle, Send, Trash2, Pencil, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import {
   intensity, recommendedWaterMl, estimateBAC,
   computeBadges, pureAlcoholG, recommendedRestH, type Night,
 } from "@/lib/destrava-store";
-import { fetchNight, addHydration } from "@/lib/nights-api";
+import { fetchNight, addHydration, updateNightTimes, deleteNight } from "@/lib/nights-api";
+import { toLocalInput, fromLocalInput } from "./new-night";
 import {
   addComment,
   deleteComment,
@@ -33,6 +35,7 @@ function NotFound() {
 
 function NightSummary() {
   const { id } = useParams({ from: "/_app/night/$id" });
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [night, setNight] = useState<Night | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +43,11 @@ function NightSummary() {
   const [newComment, setNewComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [editingTimes, setEditingTimes] = useState(false);
+  const [editStart, setEditStart] = useState("");
+  const [editEnd, setEditEnd] = useState("");
+  const [savingTimes, setSavingTimes] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +87,41 @@ function NightSummary() {
   const handleDeleteComment = async (cid: string) => {
     await deleteComment(cid);
     setComments((prev) => prev.filter((c) => c.id !== cid));
+  };
+
+  const startEditTimes = () => {
+    if (!night) return;
+    setEditStart(toLocalInput(new Date(night.startedAt)));
+    setEditEnd(toLocalInput(new Date(night.endedAt ?? Date.now())));
+    setEditingTimes(true);
+  };
+
+  const saveTimes = async () => {
+    if (!night) return;
+    const sISO = fromLocalInput(editStart);
+    const eISO = fromLocalInput(editEnd);
+    if (new Date(eISO).getTime() < new Date(sISO).getTime()) {
+      toast.error("A saída deve ser depois da chegada");
+      return;
+    }
+    setSavingTimes(true);
+    const ok = await updateNightTimes(night.id, sISO, eISO);
+    setSavingTimes(false);
+    if (!ok) { toast.error("Não foi possível atualizar"); return; }
+    setNight({ ...night, startedAt: sISO, endedAt: eISO });
+    setEditingTimes(false);
+    toast.success("Horários atualizados");
+  };
+
+  const handleDeleteNight = async () => {
+    if (!night) return;
+    if (!confirm("Apagar esta noite? Essa ação não pode ser desfeita.")) return;
+    setDeleting(true);
+    const ok = await deleteNight(night.id);
+    setDeleting(false);
+    if (!ok) { toast.error("Não foi possível apagar"); return; }
+    toast.success("Noite apagada");
+    navigate({ to: "/feed" });
   };
 
   if (loading) {
@@ -154,6 +197,55 @@ function NightSummary() {
           </button>
         </div>
       </section>
+
+      {user?.id === night.userId && (
+        <section className="glass rounded-3xl p-5">
+          {!editingTimes ? (
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h3 className="font-display font-bold text-sm">Gerenciar noite</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Edite os horários ou apague o post.</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={startEditTimes}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary text-sm font-semibold hover:bg-primary/20 transition">
+                  <Pencil className="h-3.5 w-3.5" /> Editar horários
+                </button>
+                <button onClick={handleDeleteNight} disabled={deleting}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-destructive/15 border border-destructive/40 text-destructive text-sm font-semibold hover:bg-destructive/25 transition disabled:opacity-50">
+                  <Trash2 className="h-3.5 w-3.5" /> {deleting ? "Apagando…" : "Apagar"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Chegada</span>
+                  <input type="datetime-local" value={editStart} onChange={(e) => setEditStart(e.target.value)}
+                    className="mt-1 w-full bg-input rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary text-sm" />
+                </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Saída</span>
+                  <input type="datetime-local" value={editEnd} onChange={(e) => setEditEnd(e.target.value)}
+                    className="mt-1 w-full bg-input rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary text-sm" />
+                </label>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setEditingTimes(false)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary text-sm font-semibold">
+                  <X className="h-3.5 w-3.5" /> Cancelar
+                </button>
+                <button onClick={saveTimes} disabled={savingTimes}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-neon text-sm font-semibold glow-neon disabled:opacity-50">
+                  <Check className="h-3.5 w-3.5" /> {savingTimes ? "Salvando…" : "Salvar"}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
 
       <section className="glass rounded-3xl p-6">
         <div className="flex items-center justify-between mb-2">

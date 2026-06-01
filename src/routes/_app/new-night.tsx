@@ -22,6 +22,9 @@ function NewNight() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+  const nowLocal = toLocalInput(new Date());
+  const [startedAt, setStartedAt] = useState<string>(nowLocal);
+  const [endedAt, setEndedAt] = useState<string>(nowLocal);
 
   const addDrink = (preset: typeof DRINK_PRESETS[number]) => {
     setDrinks((d) => [...d, {
@@ -43,6 +46,12 @@ function NewNight() {
   const finish = async () => {
     if (!user) { toast.error("Você precisa estar logado"); return; }
     if (saving) return;
+    const startISO = fromLocalInput(startedAt);
+    const endISO = fromLocalInput(endedAt);
+    if (new Date(endISO).getTime() < new Date(startISO).getTime()) {
+      toast.error("A saída deve ser depois da chegada");
+      return;
+    }
     setSaving(true);
     const id = await createNight(user.id, {
       title: title || "Minha noite",
@@ -51,6 +60,8 @@ function NewNight() {
       venue,
       drinks,
       photoFile,
+      startedAt: startISO,
+      endedAt: endISO,
     });
     setSaving(false);
     if (!id) { toast.error("Não foi possível salvar a noite"); return; }
@@ -79,6 +90,17 @@ function NewNight() {
               className="w-full bg-input rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-primary" />
           </div>
         </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Chegada">
+            <input type="datetime-local" value={startedAt} onChange={(e) => setStartedAt(e.target.value)}
+              className="w-full bg-input rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary text-sm" />
+          </Field>
+          <Field label="Saída">
+            <input type="datetime-local" value={endedAt} onChange={(e) => setEndedAt(e.target.value)}
+              className="w-full bg-input rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary text-sm" />
+          </Field>
+        </div>
 
         <Field label="Vibe">
           <div className="grid grid-cols-4 gap-2">
@@ -159,4 +181,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
   );
+}
+
+function pad(n: number) { return n.toString().padStart(2, "0"); }
+export function toLocalInput(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+export function fromLocalInput(s: string): string {
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
 }
