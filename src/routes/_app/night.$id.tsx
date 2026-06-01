@@ -89,6 +89,41 @@ function NightSummary() {
     setComments((prev) => prev.filter((c) => c.id !== cid));
   };
 
+  const startEditTimes = () => {
+    if (!night) return;
+    setEditStart(toLocalInput(new Date(night.startedAt)));
+    setEditEnd(toLocalInput(new Date(night.endedAt ?? Date.now())));
+    setEditingTimes(true);
+  };
+
+  const saveTimes = async () => {
+    if (!night) return;
+    const sISO = fromLocalInput(editStart);
+    const eISO = fromLocalInput(editEnd);
+    if (new Date(eISO).getTime() < new Date(sISO).getTime()) {
+      toast.error("A saída deve ser depois da chegada");
+      return;
+    }
+    setSavingTimes(true);
+    const ok = await updateNightTimes(night.id, sISO, eISO);
+    setSavingTimes(false);
+    if (!ok) { toast.error("Não foi possível atualizar"); return; }
+    setNight({ ...night, startedAt: sISO, endedAt: eISO });
+    setEditingTimes(false);
+    toast.success("Horários atualizados");
+  };
+
+  const handleDeleteNight = async () => {
+    if (!night) return;
+    if (!confirm("Apagar esta noite? Essa ação não pode ser desfeita.")) return;
+    setDeleting(true);
+    const ok = await deleteNight(night.id);
+    setDeleting(false);
+    if (!ok) { toast.error("Não foi possível apagar"); return; }
+    toast.success("Noite apagada");
+    navigate({ to: "/feed" });
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto max-w-2xl px-4 sm:px-6 py-10">
