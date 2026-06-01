@@ -35,6 +35,7 @@ function NotFound() {
 
 function NightSummary() {
   const { id } = useParams({ from: "/_app/night/$id" });
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [night, setNight] = useState<Night | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,11 @@ function NightSummary() {
   const [newComment, setNewComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [editingTimes, setEditingTimes] = useState(false);
+  const [editStart, setEditStart] = useState("");
+  const [editEnd, setEditEnd] = useState("");
+  const [savingTimes, setSavingTimes] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
