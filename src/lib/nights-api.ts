@@ -95,6 +95,29 @@ export async function addHydration(nightId: string, ml: number): Promise<number>
   return next;
 }
 
+export async function updateNightTimes(
+  nightId: string,
+  startedAt: string,
+  endedAt: string | null,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("nights")
+    .update({ started_at: startedAt, ended_at: endedAt })
+    .eq("id", nightId);
+  if (error) { console.error("updateNightTimes", error); return false; }
+  return true;
+}
+
+export async function deleteNight(nightId: string): Promise<boolean> {
+  await supabase.from("drinks").delete().eq("night_id", nightId);
+  await supabase.from("night_venues").delete().eq("night_id", nightId);
+  await supabase.from("comments").delete().eq("night_id", nightId);
+  await supabase.from("likes").delete().eq("night_id", nightId);
+  const { error } = await supabase.from("nights").delete().eq("id", nightId);
+  if (error) { console.error("deleteNight", error); return false; }
+  return true;
+}
+
 // Likes are owned by social-api.ts (Phase 3): `toggleLike(meId, nightId, liked)`.
 
 export type CreateNightInput = {
