@@ -59,12 +59,15 @@ export function recommendedRestH(drinks: Drink[]) {
 
 export function intensity(drinks: Drink[]): { pct: number; label: string; color: string } {
   const g = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
-  // 100g de álcool puro = topo da escala (noite muito pesada)
-  const pct = Math.min(100, Math.round((g / 100) * 100));
+  // Baseado no pico de BAC estimado (Widmark, 70kg, r=0.68), sem eliminação.
+  // Faixas reais: <0.3 leve, 0.3-0.6 social, 0.6-1.2 intenso, >1.2 cuidado.
+  // Topo da escala (100%) = 2.0 g/L (intoxicação alcoólica severa).
+  const peakBac = g / (70 * 0.68);
+  const pct = Math.min(100, Math.round((peakBac / 2.0) * 100));
   let label = "Leve", color = "var(--success)";
-  if (pct > 30) { label = "Social"; color = "var(--cyan)"; }
-  if (pct > 60) { label = "Intenso"; color = "var(--warning)"; }
-  if (pct > 85) { label = "Cuidado"; color = "var(--destructive)"; }
+  if (peakBac > 0.3) { label = "Social"; color = "var(--cyan)"; }
+  if (peakBac > 0.6) { label = "Intenso"; color = "var(--warning)"; }
+  if (peakBac > 1.2) { label = "Cuidado"; color = "var(--destructive)"; }
   return { pct, label, color };
 }
 
