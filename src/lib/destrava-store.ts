@@ -54,7 +54,7 @@ export function recommendedRestH(drinks: Drink[]) {
   const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
   // ~8g de álcool puro metabolizados por hora
   const metabolizeH = totalG / 8;
-  return Math.max(6, Math.ceil(metabolizeH));
+  return Math.ceil(metabolizeH);
 }
 
 export function intensity(drinks: Drink[]): { pct: number; label: string; color: string } {
