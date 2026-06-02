@@ -44,19 +44,23 @@ export function pureAlcoholG(d: Drink) {
 
 export function estimateBAC(drinks: Drink[], hours = 3) {
   const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
-  const bac = totalG / (70 * 0.68) - 0.15 * hours;
+  // Widmark: BAC (g/L) = grams / (weight_kg * r) - eliminação * horas
+  // 70kg, r=0.68 (homem médio), taxa real de eliminação ~0.12 g/L por hora
+  const bac = totalG / (70 * 0.68) - 0.12 * hours;
   return Math.max(0, Math.round(bac * 100) / 100);
 }
 
 export function recommendedRestH(drinks: Drink[]) {
   const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
+  // ~8g de álcool puro metabolizados por hora + 1h de margem
   const metabolizeH = totalG / 8;
-  return Math.max(7, Math.ceil(metabolizeH + 6));
+  return Math.max(6, Math.ceil(metabolizeH + 1));
 }
 
 export function intensity(drinks: Drink[]): { pct: number; label: string; color: string } {
   const g = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
-  const pct = Math.min(100, Math.round((g / 80) * 100));
+  // 100g de álcool puro = topo da escala (noite muito pesada)
+  const pct = Math.min(100, Math.round((g / 100) * 100));
   let label = "Leve", color = "var(--success)";
   if (pct > 30) { label = "Social"; color = "var(--cyan)"; }
   if (pct > 60) { label = "Intenso"; color = "var(--warning)"; }
