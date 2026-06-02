@@ -52,9 +52,9 @@ export function estimateBAC(drinks: Drink[], hours = 3) {
 
 export function recommendedRestH(drinks: Drink[]) {
   const totalG = drinks.reduce((a, d) => a + pureAlcoholG(d), 0);
-  // ~8g de álcool puro metabolizados por hora + 1h de margem
+  // ~8g de álcool puro metabolizados por hora
   const metabolizeH = totalG / 8;
-  return Math.max(6, Math.ceil(metabolizeH + 1));
+  return Math.max(6, Math.ceil(metabolizeH));
 }
 
 export function intensity(drinks: Drink[]): { pct: number; label: string; color: string } {
